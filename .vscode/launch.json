@@ -1,0 +1,22 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: main.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}${pathSeparator}core${pathSeparator}main.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "iBZGicmzQZ0CTkvoLW2H~_syPlyRs48LqFaxg4Hf2oA~AqEGhOaJNSdtvdHxWCmQmKbBYvH4plC0XIyd2fMSEJLsfx-oE0kq5ADxzXn9cH5w",
+                "19",
+                "${workspaceFolder}${pathSeparator}tests${pathSeparator}shapefiles${pathSeparator}input.shp",
+                "${workspaceFolder}${pathSeparator}tests${pathSeparator}images"
+            ]
+        }
+    ]
+}

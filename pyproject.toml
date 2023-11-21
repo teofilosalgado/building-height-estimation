@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "building-height-estimation"
+version = "0.1.0"
+description = "Scripts to estimate building height using high-resolution satellite imagery."
+authors = ["João Victor Teófilo Salgado"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+gdal = "3.4.1"
+pyquadkey2 = "^0.2.2"
+click = "^8.1.7"
+pillow = "^10.1.0"
+requests = "^2.31.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
