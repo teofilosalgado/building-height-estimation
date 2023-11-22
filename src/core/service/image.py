@@ -3,8 +3,8 @@ from typing import Dict, Iterable, Tuple
 
 from PIL import Image
 
-from core.clients import Base
-from core.models import AOI, Mosaic, Tile
+from core.client import Base
+from core.model import AOI, Mosaic, Tile
 
 
 def generate_mosaic_from_aoi(client: Base, aoi: AOI):

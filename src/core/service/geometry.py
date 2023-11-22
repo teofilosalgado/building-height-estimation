@@ -3,7 +3,7 @@ from typing import Generator
 from osgeo import gdal, ogr, osr
 from osgeo.osr import SpatialReference
 
-from core.models import AOI
+from core.model import AOI
 
 
 def get_aois_from_feature_class(

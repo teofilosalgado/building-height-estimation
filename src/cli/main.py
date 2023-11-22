@@ -1,12 +1,7 @@
-from datetime import datetime
-
 import click
-from core.clients import Bing
-from core.services import geometry, image
-
-
-def get_iso8601():
-    return datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+from core.client import Bing
+from core.client.virtual_earth import VirtualEarthMetadata
+from core.service import geometry, image
 
 
 @click.command()
@@ -20,6 +15,9 @@ def main(
     input_feature_class_path: str,
     download_folder_path: str,
 ):
+    x = VirtualEarthMetadata(api_key)
+    y = x.get_complete()
+    z = x.get_basic(default_zoom_level, "-21,-43")
     # Default imagery client
     client = Bing(api_key, default_zoom_level, download_folder_path)
 

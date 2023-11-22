@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from datetime import date
 from typing import List
 
-from core.models.aoi import AOI
-from core.models.tile import Tile
+from core.model.aoi import AOI
+from core.model.tile import Tile
 
 
 @dataclass

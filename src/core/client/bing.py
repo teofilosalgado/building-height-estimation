@@ -7,8 +7,8 @@ from urllib.parse import urljoin
 import requests
 from pyquadkey2 import quadkey
 
-from core.clients.base import Base
-from core.models import Tile
+from core.client.base import Base
+from core.model import Tile
 
 
 class Bing(Base):

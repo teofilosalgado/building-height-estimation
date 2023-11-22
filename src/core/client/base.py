@@ -4,7 +4,7 @@ from typing import List
 
 from osgeo import osr
 
-from core.models import Tile
+from core.model import Tile
 
 
 class Base:
