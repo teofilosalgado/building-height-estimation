@@ -5,17 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: main.py",
+            "name": "cli",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}${pathSeparator}core${pathSeparator}main.py",
+            "program": "${workspaceFolder}${pathSeparator}src${pathSeparator}cli${pathSeparator}main.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "args": [
                 "iBZGicmzQZ0CTkvoLW2H~_syPlyRs48LqFaxg4Hf2oA~AqEGhOaJNSdtvdHxWCmQmKbBYvH4plC0XIyd2fMSEJLsfx-oE0kq5ADxzXn9cH5w",
                 "19",
+                "${workspaceFolder}${pathSeparator}tests${pathSeparator}images",
                 "${workspaceFolder}${pathSeparator}tests${pathSeparator}shapefiles${pathSeparator}input.shp",
-                "${workspaceFolder}${pathSeparator}tests${pathSeparator}images"
             ]
         }
     ]

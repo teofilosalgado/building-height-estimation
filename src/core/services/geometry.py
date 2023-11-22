@@ -1,10 +1,15 @@
+from typing import Generator
+
 from osgeo import gdal, ogr, osr
 from osgeo.osr import SpatialReference
 
+from core.models import AOI
 
-def get_envelope_from_feature(
-    input_feature_class_path: str, output_spatial_reference: SpatialReference
-):
+
+def get_aois_from_feature_class(
+    output_spatial_reference: SpatialReference,
+    input_feature_class_path: str,
+) -> Generator[AOI, None, None]:
     # Read input feature class
     input_feature_class = ogr.Open(input_feature_class_path, gdal.OF_VECTOR)
 
@@ -12,8 +17,8 @@ def get_envelope_from_feature(
     input_layer = input_feature_class.GetLayer()
     for input_feature in input_layer:
         # Get feature properties
-        id = input_feature.GetField("FID")
-        label = input_feature.GetField("LABEL")
+        id = int(input_feature.GetField("FID"))
+        label = str(input_feature.GetField("LABEL"))
         # Get feature geometry, spatial reference and authority code
         input_geometry = input_feature.GetGeometryRef()
         input_spatial_reference = input_geometry.GetSpatialReference()
@@ -28,5 +33,5 @@ def get_envelope_from_feature(
             )
             input_geometry.Transform(transform)
 
-        # Get geometry envelope
-        envelope = input_geometry.GetEnvelope()
+        # Yield area of interest
+        yield AOI(id, label, input_geometry)

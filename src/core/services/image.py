@@ -1,10 +1,28 @@
-from typing import Dict, List, Tuple
+import os
+from typing import Dict, Iterable, Tuple
 
-from models import Tile
 from PIL import Image
 
+from core.clients import Base
+from core.models import AOI, Mosaic, Tile
 
-def merge_tiles(tiles: List[Tile], tile_height: int, tile_width: int):
+
+def generate_mosaic_from_aoi(client: Base, aoi: AOI):
+    tiles = client.download_tiles_from_envelope(*aoi.envelope)
+    image_date = client.get_imagery_date_from_centroid(*aoi.centroid)
+    image_path = _merge_tiles(
+        client.image_height, client.image_width, client.download_folder_path, aoi, tiles
+    )
+    return Mosaic(aoi, tiles, image_date, image_path)
+
+
+def _merge_tiles(
+    tile_height: int,
+    tile_width: int,
+    download_folder_path: str,
+    aoi: AOI,
+    tiles: Iterable[Tile],
+):
     # Sort tiles from top left to bottom right
     sorted_tiles = sorted(tiles, key=lambda item: [item.y, item.x])
 
@@ -33,5 +51,7 @@ def merge_tiles(tiles: List[Tile], tile_height: int, tile_width: int):
             tile_image.close()
 
     # Full quality on the output image
-    final_image.save("complete.jpg", quality=100)
+    final_image_path = os.path.join(download_folder_path, f"{aoi.id}.jpeg")
+    final_image.save(final_image_path, quality=100)
     final_image.close()
+    return final_image_path

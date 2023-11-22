@@ -1,16 +1,18 @@
 from abc import abstractmethod
-from typing import Generator
+from datetime import date
+from typing import List
 
-from models import Tile
 from osgeo import osr
+
+from core.models import Tile
 
 
 class Base:
     def __init__(
         self,
+        epsg: int,
         default_zoom_level: int,
         download_folder_path: str,
-        epsg: int,
     ) -> None:
         self.default_zoom_level = default_zoom_level
         self.download_folder_path = download_folder_path
@@ -27,5 +29,19 @@ class Base:
         max_x: float,
         min_y: float,
         max_y: float,
-    ) -> Generator[Tile, None, None]:
+    ) -> List[Tile]:
+        pass
+
+    @abstractmethod
+    def get_imagery_date_from_centroid(self, x: float, y: float) -> date:
+        pass
+
+    @property
+    @abstractmethod
+    def image_height(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
+    def image_width(self) -> int:
         pass
