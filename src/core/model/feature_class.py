@@ -40,3 +40,4 @@ class FeatureClass:
             # Generate area of interest
             aois.append(AOI(id, label, input_geometry))
         self.aois = aois
+        input_feature_class = None

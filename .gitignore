@@ -162,6 +162,7 @@ cython_debug/
 # Downloaded images
 *.jpeg
 *.jpg
+*.tiff
 
 # Test data
 *.cpg

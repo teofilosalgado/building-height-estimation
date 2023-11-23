@@ -2,6 +2,7 @@ import os
 from datetime import date
 from typing import Dict, List, Tuple
 
+from osgeo import gdal, osr
 from PIL import Image
 
 from core.model.aoi import AOI
@@ -49,8 +50,37 @@ class Mosaic:
                 final_image.paste(tile_image, (x_offset, y_offset))
                 tile_image.close()
 
-        # Full quality on the output image
-        final_image_path = os.path.join(download_folder_path, f"{aoi.id}.jpeg")
+        # Export output image as tiff
+        final_image_path = os.path.join(download_folder_path, f"{aoi.id}.tiff")
         final_image.save(final_image_path, quality=100)
         final_image.close()
         self.file_path = final_image_path
+
+        # Get corner coordinates
+        upper_left_x, upper_left_y = aoi.envelope[0], aoi.envelope[3]
+        lower_right_x, lower_right_y = aoi.envelope[1], aoi.envelope[2]
+
+        # Open output image as raster
+        final_image_raster = gdal.Open(final_image_path, gdal.GA_ReadOnly)
+
+        # Create a new transformation
+        geo_transform = [
+            upper_left_x,
+            (lower_right_x - upper_left_x) / final_image_raster.RasterXSize,
+            0,
+            upper_left_y,
+            0,
+            (lower_right_y - upper_left_y) / final_image_raster.RasterYSize,
+        ]
+
+        # Open the image file in write mode
+        final_image_raster = gdal.Open(final_image_path, gdal.GA_Update)
+
+        # Set the new geotransform and projection
+        spatial_reference = osr.SpatialReference()
+        spatial_reference.ImportFromEPSG(4326)
+        final_image_raster.SetGeoTransform(geo_transform)
+        final_image_raster.SetProjection(spatial_reference.ExportToWkt())
+
+        # Close driver
+        final_image_raster = None
