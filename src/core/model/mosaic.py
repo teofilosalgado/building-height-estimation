@@ -2,8 +2,10 @@ import os
 from datetime import date
 from typing import Dict, List, Tuple
 
-from osgeo import gdal, osr
+import rasterio as rio
 from PIL import Image
+from rasterio.control import GroundControlPoint
+from rasterio.transform import from_gcps
 
 from core.model.aoi import AOI
 from core.model.tile import Tile
@@ -55,41 +57,40 @@ class Mosaic:
         merged_image.save(merged_image_path, quality=100)
         merged_image.close()
 
-        # Open merged image as raster
-        merged_image_raster = gdal.Open(merged_image_path, gdal.GA_Update)
-
-        # Get corner coordinates
-        upper_left_x, upper_left_y = aoi.envelope[0], aoi.envelope[3]
-        lower_right_x, lower_right_y = aoi.envelope[1], aoi.envelope[2]
-
-        # Create a new transformation
-        geo_transform = [
-            upper_left_x,
-            (lower_right_x - upper_left_x) / merged_image_raster.RasterXSize,
+        tl = GroundControlPoint(
             0,
-            upper_left_y,
             0,
-            (lower_right_y - upper_left_y) / merged_image_raster.RasterYSize,
+            aoi.envelope.min_y,
+            aoi.envelope.max_x,
+        )
+        bl = GroundControlPoint(
+            0,
+            total_height,
+            aoi.envelope.max_y,
+            aoi.envelope.max_x,
+        )
+        br = GroundControlPoint(
+            total_width,
+            total_height,
+            aoi.envelope.max_y,
+            aoi.envelope.min_x,
+        )
+        tr = GroundControlPoint(
+            total_width,
+            0,
+            aoi.envelope.min_y,
+            aoi.envelope.min_x,
+        )
+        gcps = [
+            tr,
+            bl,
+            tl,
+            br,
         ]
 
-        # Georeference merged image
-        spatial_reference = osr.SpatialReference()
-        spatial_reference.ImportFromEPSG(4326)
-        merged_image_raster.SetGeoTransform(geo_transform)
-        merged_image_raster.SetProjection(spatial_reference.ExportToWkt())
+        transform = from_gcps(gcps)
+        crs = "epsg:4326"
 
-        # Clip image to AOI
-        clipped_image_path = os.path.join(
-            download_folder_path, f"{aoi.id}-clipped.tiff"
-        )
-        gdal.Translate(
-            clipped_image_path,
-            merged_image_raster,
-            projWin=[upper_left_x, upper_left_y, lower_right_x, lower_right_y],
-        )
-
-        # Close driver
-        merged_image_raster = None
-
-        # Set mosaic image property
-        self.file_path = clipped_image_path
+        with rio.open(merged_image_path, "r+") as ds:
+            ds.crs = crs
+            ds.transform = transform

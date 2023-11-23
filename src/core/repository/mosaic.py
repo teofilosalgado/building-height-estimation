@@ -44,9 +44,12 @@ class MosaicRepository:
         results: List[Tile] = []
 
         # List quadkeys to be downloaded
-        min_x, max_x, min_y, max_y = aoi.envelope
-        top_left_quadkey = quadkey.from_geo((max_x, max_y), self.default_zoom_level)
-        bottom_right_quadkey = quadkey.from_geo((min_x, min_y), self.default_zoom_level)
+        top_left_quadkey = quadkey.from_geo(
+            (aoi.envelope.max_x, aoi.envelope.max_y), self.default_zoom_level
+        )
+        bottom_right_quadkey = quadkey.from_geo(
+            (aoi.envelope.min_x, aoi.envelope.min_y), self.default_zoom_level
+        )
         quadkeys = quadkey.QuadKey.bbox([top_left_quadkey, bottom_right_quadkey])
 
         # Iterate over quadkeys to be downloaded
