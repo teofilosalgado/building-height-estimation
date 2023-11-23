@@ -41,7 +41,7 @@ class Mosaic:
         for x in range(top_left_quadkey.x, bottom_right_quadkey.x + 1):
             for y in range(top_left_quadkey.y, bottom_right_quadkey.y + 1):
                 tile = sorted_lookup[(x, y)]
-                tile_image = Image.open(tile.image_path)
+                tile_image = Image.open(tile.file_path)
 
                 x_offset = (x - top_left_quadkey.x) * tile_width
                 y_offset = (y - top_left_quadkey.y) * tile_height
@@ -53,4 +53,4 @@ class Mosaic:
         final_image_path = os.path.join(download_folder_path, f"{aoi.id}.jpeg")
         final_image.save(final_image_path, quality=100)
         final_image.close()
-        self.image_path = final_image_path
+        self.file_path = final_image_path

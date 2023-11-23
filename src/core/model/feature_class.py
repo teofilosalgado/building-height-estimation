@@ -1,20 +1,21 @@
-from typing import Generator
+from typing import List
 
 from osgeo import gdal, ogr, osr
-from settings import get_settings
 
 from core.model import AOI
 
 
-class AOIRepository:
-    def __init__(self) -> None:
-        self.input_feature_class_path = get_settings().input_feature_class_path
+class FeatureClass:
+    def __init__(self, feature_class_path: str) -> None:
+        self.file_path = feature_class_path
         self.spatial_reference = osr.SpatialReference()
         self.spatial_reference.ImportFromEPSG(4326)
 
-    def get_all(self) -> Generator[AOI, None, None]:
+        # Calculate AOIs from feature class
+        aois: List[AOI] = []
+
         # Read input feature class
-        input_feature_class = ogr.Open(self.input_feature_class_path, gdal.OF_VECTOR)
+        input_feature_class = ogr.Open(self.file_path, gdal.OF_VECTOR)
 
         # Iterate over features
         input_layer = input_feature_class.GetLayer()
@@ -36,9 +37,6 @@ class AOIRepository:
                 )
                 input_geometry.Transform(transform)
 
-            # Yield area of interest
-            yield AOI(id, label, input_geometry)
-
-
-def get_aoi_repository():
-    return AOIRepository()
+            # Generate area of interest
+            aois.append(AOI(id, label, input_geometry))
+        self.aois = aois

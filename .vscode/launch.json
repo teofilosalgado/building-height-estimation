@@ -10,18 +10,14 @@
             "request": "launch",
             "program": "${workspaceFolder}${pathSeparator}src${pathSeparator}cli${pathSeparator}main.py",
             "console": "integratedTerminal",
-            "justMyCode": false,
-            // "args": [
-            //     "iBZGicmzQZ0CTkvoLW2H~_syPlyRs48LqFaxg4Hf2oA~AqEGhOaJNSdtvdHxWCmQmKbBYvH4plC0XIyd2fMSEJLsfx-oE0kq5ADxzXn9cH5w",
-            //     "19",
-            //     ,
-            //     ,
-            // ]
+            "justMyCode": true,
+            "args": [
+                "${workspaceFolder}${pathSeparator}tests${pathSeparator}shapefiles${pathSeparator}input.shp"
+            ],
             "env": {
                 "api_key": "iBZGicmzQZ0CTkvoLW2H~_syPlyRs48LqFaxg4Hf2oA~AqEGhOaJNSdtvdHxWCmQmKbBYvH4plC0XIyd2fMSEJLsfx-oE0kq5ADxzXn9cH5w",
                 "default_zoom_level": "19",
                 "download_folder_path": "${workspaceFolder}${pathSeparator}tests${pathSeparator}images",
-                "input_feature_class_path": "${workspaceFolder}${pathSeparator}tests${pathSeparator}shapefiles${pathSeparator}input.shp",
             }
         }
     ]

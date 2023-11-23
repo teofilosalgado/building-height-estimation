@@ -6,4 +6,4 @@ class Tile:
     x: int
     y: int
     z: int
-    image_path: str
+    file_path: str
