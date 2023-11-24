@@ -67,7 +67,8 @@ class MosaicRepository:
                 file.write(response.content)
 
             # Appende generated tile
-            results.append(Tile(tile_x, tile_y, tile_z, tile_path))
+            latitude, longitude = item.to_geo()
+            results.append(Tile(tile_x, tile_y, tile_z, tile_path, longitude, latitude))
         return results
 
     def _get_image_date_by_aoi(self, aoi: AOI) -> date:

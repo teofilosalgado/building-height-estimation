@@ -7,3 +7,5 @@ class Tile:
     y: int
     z: int
     file_path: str
+    longitude: float
+    latitude: float
