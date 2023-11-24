@@ -3,6 +3,7 @@ from datetime import date
 from typing import Dict, List, Tuple
 
 import rasterio
+from osgeo import gdal, osr
 from PIL import Image
 from rasterio.control import GroundControlPoint
 from rasterio.transform import from_gcps
@@ -59,7 +60,10 @@ class Mosaic:
                 tile_image.close()
 
         # Export mosaic as tiff
-        merged_image_path = os.path.join(download_folder_path, f"{aoi.id}-merged.tiff")
+        merged_image_path = os.path.join(
+            download_folder_path,
+            f"{aoi.id}-merged.tiff",
+        )
         merged_image.save(merged_image_path, quality=100)
         merged_image.close()
 
@@ -69,3 +73,26 @@ class Mosaic:
         with rasterio.open(merged_image_path, "r+") as ds:
             ds.crs = "epsg:4326"
             ds.transform = transform
+
+        # Clip mosaic to AOI extent
+        clipped_image_path = os.path.join(
+            download_folder_path,
+            f"{aoi.id}-clipped.tiff",
+        )
+        merged_image_raster = gdal.Open(merged_image_path, gdal.OF_RASTER)
+        spatial_reference = osr.SpatialReference()
+        spatial_reference.ImportFromEPSG(4326)
+        gdal.Translate(
+            clipped_image_path,
+            merged_image_raster,
+            projWin=[
+                aoi.envelope.min_y,
+                aoi.envelope.max_x,
+                aoi.envelope.max_y,
+                aoi.envelope.min_x,
+            ],
+            projWinSRS=spatial_reference,
+            outputSRS=spatial_reference,
+        )
+        merged_image_raster = None
+        self.file_path = clipped_image_path
