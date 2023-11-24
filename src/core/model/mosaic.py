@@ -3,10 +3,11 @@ from datetime import date
 from typing import Dict, List, Tuple
 
 import rasterio
-from osgeo import gdal, osr
+from osgeo import gdal
 from PIL import Image
 from rasterio.control import GroundControlPoint
 from rasterio.transform import from_gcps
+from settings import get_settings
 
 from core.model.aoi import AOI
 from core.model.tile import Tile
@@ -80,8 +81,6 @@ class Mosaic:
             f"{aoi.id}-clipped.tiff",
         )
         merged_image_raster = gdal.Open(merged_image_path, gdal.OF_RASTER)
-        spatial_reference = osr.SpatialReference()
-        spatial_reference.ImportFromEPSG(4326)
         gdal.Translate(
             clipped_image_path,
             merged_image_raster,
@@ -91,8 +90,8 @@ class Mosaic:
                 aoi.envelope.max_y,
                 aoi.envelope.min_x,
             ],
-            projWinSRS=spatial_reference,
-            outputSRS=spatial_reference,
+            projWinSRS=get_settings().spatial_reference,
+            outputSRS=get_settings().spatial_reference,
         )
         merged_image_raster = None
         self.file_path = clipped_image_path
