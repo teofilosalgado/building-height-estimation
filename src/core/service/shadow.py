@@ -1,10 +1,12 @@
 import gc
+import json
 import os
 
 import cv2
 import numpy as np
 import pandas as pd
 import rasterio
+from osgeo import ogr
 from rasterio.features import shapes
 from settings import get_settings
 from skimage.color import lab2lch, rgb2lab
@@ -18,23 +20,18 @@ from core.model import Mask, Mosaic
 def get_mask_by_mosaic(
     mosaic: Mosaic,
     convolve_window_size=3,
-    num_thresholds=1,
-    struc_elem_size=1,
+    number_of_thresholds=1,
+    disk_radius=1,
 ):
     """
     This function is used to detect shadow - covered areas in an image, as proposed in the paper
     'Near Real - Time Shadow Detection and Removal in Aerial Motion Imagery Application' by Silva G.F., Carneiro G.B.,
     Doth R., Amaral L.A., de Azevedo D.F.G. (2017)
 
-    Inputs:
-    - image_file: Path of image to be processed for shadow removal. It is assumed that the first 3 channels are ordered as Red, Green and Blue respectively
-    - shadow_mask_file: Path of shadow mask to be saved
+    Parameters:
     - convolve_window_size: Size of convolutional matrix filter to be used for blurring of specthem ratio image
-    - num_thresholds: Number of thresholds to be used for automatic multilevel global threshold determination
-    - struc_elem_size: Size of disk - shaped structuring element to be used for morphological closing operation
-
-    Outputs:
-    - shadow_mask: Shadow mask for input image
+    - number_of_thresholds: Number of thresholds to be used for automatic multilevel global threshold determination
+    - disk_radius: Size of disk - shaped structuring element to be used for morphological closing operation
 
     """
 
@@ -69,7 +66,7 @@ def get_mask_by_mosaic(
 
     flattened_sr_img = blurred_sr_img.flatten().reshape((-1, 1))
     labels = (
-        KMeans(n_clusters=num_thresholds + 1, max_iter=10000)
+        KMeans(n_clusters=number_of_thresholds + 1, n_init="auto", max_iter=10000)
         .fit(flattened_sr_img)
         .labels_
     )
@@ -84,7 +81,7 @@ def get_mask_by_mosaic(
     shadow_mask_initial = np.array(df["Segmented"]).reshape(
         (img.shape[0], img.shape[1])
     )
-    struc_elem = disk(struc_elem_size)
+    struc_elem = disk(disk_radius)
     shadow_mask = np.expand_dims(
         np.uint8(cv2.morphologyEx(shadow_mask_initial, cv2.MORPH_CLOSE, struc_elem)),
         axis=0,
@@ -100,6 +97,27 @@ def get_mask_by_mosaic(
     )
     with rasterio.open(shadow_mask_file_path, "w", **metadata) as dst:
         dst.write(shadow_mask)
-        shape = list(shapes(shadow_mask, transform=dst.transform))
+        geojson_shadows = [
+            shape[0]
+            for shape in shapes(shadow_mask, transform=dst.transform)
+            if shape[1]
+        ]
+    geometry_shadows = [
+        ogr.CreateGeometryFromJson(json.dumps(geojson)) for geojson in geojson_shadows
+    ]
+    largest_geometry_shadow = max(geometry_shadows, key=lambda item: item.GetArea())
+    simplified_largest_geometry_shadow = largest_geometry_shadow.Simplify(0.000005)
 
-    return Mask(mosaic, shadow_mask_file_path)
+    linear_ring = simplified_largest_geometry_shadow.GetGeometryRef(0)
+    vertex_count = linear_ring.GetPointCount()
+    vertices = [linear_ring.GetPoint(i) for i in range(vertex_count)]
+    rightmost_vertex = max(vertices, key=lambda item: item[0])
+    bottommost_vertex = min(vertices, key=lambda item: item[1])
+    line = ogr.Geometry(ogr.wkbLineString)
+    line.AddPoint(rightmost_vertex[0], rightmost_vertex[1])
+    line.AddPoint(bottommost_vertex[0], bottommost_vertex[1])
+    result = line.ExportToJson()
+    with open(f"{mosaic.aoi.id}.json", "w", encoding="utf-8") as file:
+        file.write(result)
+
+    return Mask(mosaic, shadow_mask_file_path, simplified_largest_geometry_shadow)

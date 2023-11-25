@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from osgeo import ogr
+
 from core.model.mosaic import Mosaic
 
 
@@ -7,3 +9,4 @@ from core.model.mosaic import Mosaic
 class Mask:
     mosaic: Mosaic
     file_path: str
+    shadow_area: ogr.Geometry

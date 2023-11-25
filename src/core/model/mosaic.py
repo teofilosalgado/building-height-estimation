@@ -16,7 +16,6 @@ from core.model.tile import Tile
 class Mosaic:
     def __init__(
         self,
-        download_folder_path: str,
         tile_height: int,
         tile_width: int,
         aoi: AOI,
@@ -62,7 +61,7 @@ class Mosaic:
 
         # Export mosaic as tiff
         merged_image_path = os.path.join(
-            download_folder_path,
+            get_settings().download_folder_path,
             f"{aoi.id}-merged.tiff",
         )
         merged_image.save(merged_image_path, quality=100)
@@ -77,7 +76,7 @@ class Mosaic:
 
         # Clip mosaic to AOI extent
         clipped_image_path = os.path.join(
-            download_folder_path,
+            get_settings().download_folder_path,
             f"{aoi.id}-clipped.tiff",
         )
         merged_image_raster = gdal.Open(merged_image_path, gdal.OF_RASTER)

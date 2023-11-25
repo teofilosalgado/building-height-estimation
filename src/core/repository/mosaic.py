@@ -85,7 +85,6 @@ class MosaicRepository:
         tiles = self._get_tiles_by_aoi(aoi)
         image_date = self._get_image_date_by_aoi(aoi)
         return Mosaic(
-            self.download_folder_path,
             self.image_height,
             self.image_width,
             aoi,
